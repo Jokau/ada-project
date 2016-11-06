@@ -32,8 +32,8 @@ We are trying to obtain a bigger raw set from the OFS.
 ## Feasibility and Risks
 We’ve already seen how to retrieve the data from the map. The JSON data related to each accident can be automatically retrieved with queries.
  
-Our main fear is to work on a data set that is very small (about 100’000 entries) and not on a very long period (6 years) to have reliable results. We hope the OFS can provide us a bigger set.
-Create correct area clusters of accidents overall the swiss map may be a tough task.
+Our main fear is to work on a data set that is very small (about 100’000 entries) and not on a very long period (6 years) to have reliable results. We hope the OFS can provide us a bigger set.<br/>
+Create correct area clusters of accidents overall the swiss map may be a tough task.<br/>
 We have not found yet a detailed enough map to see the road configuration changes through time and might not be able to find one.
  
 It is also important for us to do a useful work that is not a copy of the current visualization.
