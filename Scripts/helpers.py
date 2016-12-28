@@ -1,6 +1,8 @@
 import requests
 import json
 import copy
+import datetime
+import urllib
 
 import goslate
 
@@ -12,7 +14,7 @@ def import_data(all_data):
              "ch.astra.unfaelle-personenschaeden_getoetete",
              "ch.astra.unfaelle-personenschaeden_fussgaenger",
              "ch.astra.unfaelle-personenschaeden_fahrraeder",
-             "ch.astra.unfaelle-personenschaeden_motorraeder"]
+             "ch.astra.unfaelle-personenschaeden_motorraeder"]    
     data = []
 
     for layer in layers :
@@ -39,10 +41,12 @@ def import_data(all_data):
                 offset+=200
                 layer_items+=json_data #merge two lists into one
 
+            #For testing, we only take a sample of the dataset, with 603 records per layer
             if(all_data==False):
-                print("Break in loop while")
-                break
-                
+                if (offset ==600):    
+                   print("Break in loop while")
+                   break
+               
         print("Layer processed : {} records\n".format(len(layer_items)))
         data += layer_items
         #if(all_data==False):
@@ -57,16 +61,21 @@ def import_data(all_data):
 def preprocess_data(data_list):
     data_preprocessed = []
     data_list_copy = copy.deepcopy(data_list)
+    date_time = datetime.datetime.now().strftime("%Y-%m-%d-%Hh%M")
+    path_log = "logs/preprocessing_log-{}.txt".format(date_time)
+    with open(path_log, "w") as text_file:
+                    text_file.write("Preprocessing Error log on {}\n"
+                        .format(date_time))
 
     #apply each preprocessing function on each item of the dataset
     for item in data_list :
-        item = (reformat_item(clean_item(item)))
+        item = (reformat_item(clean_item(item, path_log), path_log))
         data_preprocessed.append(item)
 
     return data_preprocessed
 
 #Remove item we are not interested in
-def clean_item(item):
+def clean_item(item, log):
     if 'properties' in item:
         properties = item.get('properties')
         del properties['accidentday_de']
@@ -77,12 +86,22 @@ def clean_item(item):
         del properties['severitycategory_de']
         del properties['roadtype_de']
         del properties['roadtype_it']
+    if 'bbox' in item : 
+        del item['bbox']
+    if 'type' in item:
+        del item['type']
+    if 'featureId' in item:
+        del item['featureId']
+    if 'geometryType' in item:
+        del item['geometryType']     
+    if 'layerBodId' in item:
+        del item['layerBodId']            
 
     return item
 
 
 #reformat data so we have each property as a feature of the event
-def reformat_item(item):
+def reformat_item(item, log):
     data_list_reformat = []
     
     if 'properties' in item:
@@ -94,22 +113,38 @@ def reformat_item(item):
         coords = (item.get('geometry')).get('coordinates')
         del item['geometry']
         item = dict(item, **{'coordinates' : coords[0]})
+
+    if 'accidentday_fr' in item:
+        #print(item['accidentday_fr'][0])
+        day, time, month_year = (item['accidentday_fr']).split(" / ", 3)
+        month, year = month_year.split(" ", 2)
+        del item['accidentday_fr']
+        item = dict(item, **{'day' : day})
+        item = dict(item, **{'time' : time})
+        item = dict(item, **{'month' : month})
     
     return item
 
 #Translation worked the first but returned HTTP Error 503: Service Unavailable afterwards
 #do not use for now
-def translate_item(item):
+def translate_item(item, log):
     data_list_translate = []
     gs= goslate.Goslate()    
+    date_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
 
     if 'label' in item:
-        translation = gs.translate(item['label'], "fr")
-        if(item['label'==translation]):
-            with open("logs/translate_log.txt", "a") as text_file:
-                text_file.write("Failed to translate {}\n".format(translation))
-        del item['label']
-        item = dict(item, **{'label' : translation})
-        print("Translating label {}".format(translation))
+        try:
+            translation = gs.translate(item['label'], "fr")
+            if(item['label']==translation):
+                with open(log, "a") as text_file:
+                    text_file.write("{} : Failed to translate {}\n"
+                        .format(date_time, translation))
+            del item['label']
+            item = dict(item, **{'label' : translation})
+            print("Translating label {}".format(translation))
+        except urllib.error.HTTPError as e:
+            with open("logs/preprocessing_log.txt", "a") as text_file:
+                    text_file.write("{} : Failed to translate {} due to {}\n"
+                        .format(date_time, item['label'], e))
 
     return item
