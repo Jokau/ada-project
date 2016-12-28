@@ -106,6 +106,8 @@ def reformat_item(item):
     
     return item
 
+#Translation worked the first but returned HTTP Error 503: Service Unavailable afterwards
+#do not use for now
 def translate_item(item):
     data_list_translate = []
     gs= goslate.Goslate()    
