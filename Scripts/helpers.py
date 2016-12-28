@@ -45,9 +45,9 @@ def import_data(all_data):
                 
         print("Layer processed : {} records\n".format(len(layer_items)))
         data += layer_items
-        if(all_data==False):
-            print("Break in for loop")    
-            break    
+        #if(all_data==False):
+        #    print("Break in for loop")    
+        #    break    
         
     print("Whole dataset processed : {} records\n".format(len(data)))
 
@@ -93,7 +93,7 @@ def reformat_item(item):
     if 'geometry' in item:
         coords = (item.get('geometry')).get('coordinates')
         del item['geometry']
-        item = dict(item, **{'coordinates' : coords})
+        item = dict(item, **{'coordinates' : coords[0]})
     
     return item
 
