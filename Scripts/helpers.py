@@ -116,7 +116,6 @@ def translate_item(item):
         translation = gs.translate(item['label'], "fr")
         if(item['label'==translation]):
             with open("logs/translate_log.txt", "a") as text_file:
-
                 text_file.write("Failed to translate {}\n".format(translation))
         del item['label']
         item = dict(item, **{'label' : translation})
