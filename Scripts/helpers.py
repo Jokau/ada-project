@@ -83,8 +83,10 @@ def clean_item(item):
         del properties['accidenttype_it']
         del properties['severitycategory_it']
         del properties['severitycategory_de']
+        del properties['roadtype_de']
+        del properties['roadtype_it']
         #print("prop")
-        
+
     return item
 
 
