@@ -7,7 +7,7 @@ import goslate
 import numpy as np
 import pandas as pd
 
-def import_data(all_data = False):
+def import_data(all_data):
     layers =["ch.astra.unfaelle-personenschaeden_alle",
              "ch.astra.unfaelle-personenschaeden_getoetete",
              "ch.astra.unfaelle-personenschaeden_fussgaenger",
@@ -15,49 +15,41 @@ def import_data(all_data = False):
              "ch.astra.unfaelle-personenschaeden_motorraeder"]
     data = []
 
-    if ~all_data:
-        for layer in layers :
+    for layer in layers :
 
-            offset = 0
-            continue_=True
+        offset = 0
+        continue_=True
 
-            print("Processing layer : {}".format(layer))
-            layer_items = []
+        print("Processing layer : {}".format(layer))
+        layer_items = []
 
-            while(continue_):
-                query='https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=446000.0000000001,37750,860500.0000000002,317750.00000000006&geometryFormat=geojson&geometryType=esriGeometryEnvelope&imageDisplay=1536,759,96&lang=fr&layers=all:{}&mapExtent=276000,250,1044000,379750&offset={}&returnGeometry=true&tolerance=5'.format(layer, offset)
-                #query='https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=446000.0000000001,37750,860500.0000000002,317750.00000000006&geometryFormat=geojson&geometryType=esriGeometryEnvelope&imageDisplay=1536,759,96&lang=fr&layers=all:ch.astra.unfaelle-personenschaeden_getoetete&mapExtent=276000,250,1044000,379750&offset={0}&returnGeometry=true&tolerance=5'.format(offset)
+        while(continue_):
+            query='https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=446000.0000000001,37750,860500.0000000002,317750.00000000006&geometryFormat=geojson&geometryType=esriGeometryEnvelope&imageDisplay=1536,759,96&lang=fr&layers=all:{}&mapExtent=276000,250,1044000,379750&offset={}&returnGeometry=true&tolerance=5'.format(layer, offset)
+            #query='https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=446000.0000000001,37750,860500.0000000002,317750.00000000006&geometryFormat=geojson&geometryType=esriGeometryEnvelope&imageDisplay=1536,759,96&lang=fr&layers=all:ch.astra.unfaelle-personenschaeden_getoetete&mapExtent=276000,250,1044000,379750&offset={0}&returnGeometry=true&tolerance=5'.format(offset)
 
-                r=requests.get(query)
+            r=requests.get(query)
 
-                json_data=(json.loads(str(r.text))).get('results')
+            json_data=(json.loads(str(r.text))).get('results')
 
-                if(len(json_data) == 0):
-                    #no more data to scrape
-                    continue_=False
-                else :
-                    #set offset to the beginning of the next file to import
-                    offset+=200
-                    layer_items+=json_data #merge two lists into one
+            if(len(json_data) == 0):
+                #no more data to scrape
+                continue_=False
+            else :
+                #set offset to the beginning of the next file to import
+                offset+=200
+                layer_items+=json_data #merge two lists into one
 
-                if(~all_data):
-                    break
-                    
-            print("Layer processed : {} records\n".format(len(layer_items)))
-            data += layer_items
-            if(~all_data):
-                break    
-            
-        print("Whole dataset processed : {} records\n".format(len(data)))
-
-    # else:
-    #     url_0="https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=446000.0000000001,37750,860500.0000000002,317750.00000000006&geometryFormat=geojson&geometryType=esriGeometryEnvelope&imageDisplay=1536,759,96&lang=fr&layers=all:ch.astra.unfaelle-personenschaeden_getoetete&mapExtent=276000,250,1044000,379750&returnGeometry=true&tolerance=5"
-    #     url_1="https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=446000.0000000001,37750,860500.0000000002,317750.00000000006&geometryFormat=geojson&geometryType=esriGeometryEnvelope&imageDisplay=1536,759,96&lang=fr&layers=all:ch.astra.unfaelle-personenschaeden_getoetete&mapExtent=276000,250,1044000,379750&offset=200&returnGeometry=true&tolerance=5"
-    #     r0=requests.get(url_0)
-    #     r1=requests.get(url_1)
-    #     json_data0=(json.loads(str(r0.text))).get('results')
-    #     json_data1=(json.loads(str(r1.text))).get('results')
-    #     data = json_data0+json_data1
+            if(all_data==False):
+                print("Break in loop while")
+                break
+                
+        print("Layer processed : {} records\n".format(len(layer_items)))
+        data += layer_items
+        if(all_data==False):
+            print("Break in for loop")    
+            break    
+        
+    print("Whole dataset processed : {} records\n".format(len(data)))
 
     return data
 
@@ -85,7 +77,6 @@ def clean_item(item):
         del properties['severitycategory_de']
         del properties['roadtype_de']
         del properties['roadtype_it']
-        #print("prop")
 
     return item
 
@@ -98,13 +89,11 @@ def reformat_item(item):
         properties = item.get('properties')
         del item['properties']
         item = dict(item, **properties)
-        #print("prop")
 
     if 'geometry' in item:
         coords = (item.get('geometry')).get('coordinates')
         del item['geometry']
         item = dict(item, **{'coordinates' : coords})
-        #print("geo")
     
     return item
 
