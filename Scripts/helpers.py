@@ -43,17 +43,15 @@ def import_data(all_data):
 
             #For testing, we only take a sample of the dataset, with 603 records per layer
             if(all_data==False):
-                if (offset ==600):    
-                   print("Break in loop while")
+                if (offset ==800):    
                    break
                
         print("Layer processed : {} records\n".format(len(layer_items)))
-        data += layer_items
-        #if(all_data==False):
-        #    print("Break in for loop")    
-        #    break    
-        
-    print("Whole dataset processed : {} records\n".format(len(data)))
+        data += layer_items 
+    if(all_data):    
+        print("Whole dataset processed : {} records\n".format(len(data)))
+    else:
+    	print("Sample dataset processed : {} records\n".format(len(data)))
 
     return data
 
@@ -62,14 +60,16 @@ def preprocess_data(data_list):
     data_preprocessed = []
     data_list_copy = copy.deepcopy(data_list)
     date_time = datetime.datetime.now().strftime("%Y-%m-%d-%Hh%M")
-    path_log = "logs/preprocessing_log-{}.txt".format(date_time)
+    path_log = "logs/preprocessing_logs/{}.txt".format(date_time)
     with open(path_log, "w") as text_file:
                     text_file.write("Preprocessing Error log on {}\n"
                         .format(date_time))
 
     #apply each preprocessing function on each item of the dataset
     for item in data_list :
-        item = (reformat_item(clean_item(item, path_log), path_log))
+        item = clean_item(item, path_log)
+        item = reformat_item(item, path_log)
+        #item = translate_item(item, path_log)
         data_preprocessed.append(item)
 
     return data_preprocessed
@@ -143,7 +143,7 @@ def translate_item(item, log):
             item = dict(item, **{'label' : translation})
             print("Translating label {}".format(translation))
         except urllib.error.HTTPError as e:
-            with open("logs/preprocessing_log.txt", "a") as text_file:
+            with open(log, "a") as text_file:
                     text_file.write("{} : Failed to translate {} due to {}\n"
                         .format(date_time, item['label'], e))
 

@@ -5,7 +5,7 @@ import pandas as pd
 
 def plot_all_features(data):
     date_time = datetime.datetime.now().strftime("%Y-%m-%d-%Hh%M")
-    path_log = "logs/plot_log-{}.txt".format(date_time)
+    path_log = "logs/plot_logs/{}.txt".format(date_time)
 
     dont_plot = ['fsocommunecode', 'type', 'layerBodId', 'geometryType', 'featureId', 'bbox', 'accidentday_fr']
 
@@ -16,25 +16,26 @@ def plot_all_features(data):
 
     print("Plotting all features")
     for feature in data:
-    	if feature not in dont_plot:
-        	plot_feature(data, feature, date_time)
+        if feature not in dont_plot:
+            plot_feature(data, feature, date_time)
     print("Done plotting")
 
 
 def plot_feature_combination(data, features):
-    column=""
-    value=""
+    column=""+features[0]
+    value=""+data[features[0]].astype(str)
     
-    for feature in features :
-        column+=feature
-        value+=data[feature].astype(str)
+    for feature in features:
+        if(feature != features[0]):
+            column+="_"+feature
+            value+="_"+data[feature].astype(str)
     
     data[column] = value
     
     df = (data.groupby(column).count())['canton']
     
     print("Plotting features : {}".format(features))
-    title = "events_per_{}".format(column)
+    title = "Number of events per {}".format(column)       
 
     df.plot(kind='bar', stacked=False)
 
@@ -43,13 +44,13 @@ def plot_feature_combination(data, features):
     plt.title(title)
     plt.xticks(rotation=70)
 
-    plt.savefig("Resources/plots/{}.png".format(title), dpi=200)
+    plt.savefig("Resources/plots/Feature_combinations/{}.png".format(title), dpi=200)
 
-    print("Done plotting {}".format(features))
+    print("Done plotting {}".format(column))
 
 
 def plot_feature(data, feature, date):
-    path_log = "logs/plot_log-{}.txt".format(date)    
+    path_log = "logs/plot_logs/{}.txt".format(date)    
     font = {'family' : 'monospace',
         'weight' : 'normal',
         'size'   : 5}
@@ -62,7 +63,7 @@ def plot_feature(data, feature, date):
 #    dont_plot = ['type', 'layerBodId', 'geometryType', 'featureId', 'bbox', 'accidentday_fr']
     not_plotted_features = list(set(data.columns.values) - set(feature))
 
-    title = "events_per_{}".format(feature)        
+    title = "Number of events per {}".format(feature)        
 
 
 #    if feature not in dont_plot:
@@ -92,4 +93,4 @@ def plot_feature(data, feature, date):
     #plt.rc('xtick', labelsize=45) 
 
 
-    plt.savefig("Resources/plots/{}.png".format(title), dpi=200)
+    plt.savefig("Resources/plots/Features/{}.png".format(title), dpi=200)
