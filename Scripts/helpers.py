@@ -51,7 +51,7 @@ def import_data(all_data):
     if(all_data):    
         print("Whole dataset processed : {} records\n".format(len(data)))
     else:
-    	print("Sample dataset processed : {} records\n".format(len(data)))
+        print("Sample dataset processed : {} records\n".format(len(data)))
 
     return data
 
@@ -148,3 +148,28 @@ def translate_item(item, log):
                         .format(date_time, item['label'], e))
 
     return item
+
+#found on http://python.jpvweb.com/mesrecettespython/doku.php?id=combinaisons
+def combinliste(seq, k=2):
+    p = []
+    i, imax = 0, 2**len(seq)-1
+    while i<=imax:
+        s = []
+        j, jmax = 0, len(seq)-1
+        while j<=jmax:
+            if (i>>j)&1==1:
+                s.append(seq[j])
+            j += 1
+        if len(s)==k:
+            p.append(s)
+        i += 1 
+    return p
+
+def generate_feature_combinations(feats, size):
+    combinations = []    
+    for i in range(size+1):
+        #print(i)
+        combinations.append(combinliste(feats, i))
+        
+    return combinations
+

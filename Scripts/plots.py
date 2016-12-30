@@ -2,13 +2,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 import datetime
 import pandas as pd
+from Scripts.helpers import *
+import pprint
+import os
 
-def plot_all_features(data):
+def plot_all_features(data, exclusion_list = ['fsocommunecode', 'type', 'layerBodId', 'geometryType', 'featureId', 'bbox', 'accidentday_fr', 'coordinates']):
     date_time = datetime.datetime.now().strftime("%Y-%m-%d-%Hh%M")
     path_log = "logs/plot_logs/{}.txt".format(date_time)
-
-    dont_plot = ['fsocommunecode', 'type', 'layerBodId', 'geometryType', 'featureId', 'bbox', 'accidentday_fr']
-
 
     with open(path_log, "w") as text_file:
                     text_file.write("Plot Error log on {}\n"
@@ -16,14 +16,48 @@ def plot_all_features(data):
 
     print("Plotting all features")
     for feature in data:
-        if feature not in dont_plot:
+        if feature not in exclusion_list:
             plot_feature(data, feature, date_time)
-    print("Done plotting")
+    print("-> Done plotting")
 
 
-def plot_feature_combination(data, features):
+#plot every possible combination of features in the data of a given size, except the features in the exclusion list
+def plot_all_feature_combinations(data, exclusion_list=['fsocommunecode', 'type', 'layerBodId', 'geometryType', 'featureId', 'bbox', 'accidentday_fr', 'coordinates'], size=0):
+    print("***Generating feature combinations***")
+    features = list(set(data.columns) - set(exclusion_list))
+
+    if(size == 1):
+        print("-> Done")
+        plot_all_features(data)
+    else:   
+        feature_combinations = generate_feature_combinations(features, size)
+        print("-> Done")
+    
+        print("***Plotting feature combinations***")
+
+        for combinations in feature_combinations:
+            for combination in combinations:
+                if len(combination)>1:
+                    plot_feature_combination(data, combination, False)
+
+        print("-> Done")
+
+#plot the combination of features given as a parameter
+def plot_feature_combination(df, features, verbose=False):
+    data = df.copy()
+    dir_ = "Resources/plots/{}-features".format(len(features))    
+
     column=""+features[0]
     value=""+data[features[0]].astype(str)
+
+    font = {'family' : 'monospace',
+        'weight' : 'normal',
+        'size'   : 5}
+
+    fig, ax = plt.subplots()
+    fig.set_size_inches(15, 10)
+
+    matplotlib.rc('font', **font)
     
     for feature in features:
         if(feature != features[0]):
@@ -34,7 +68,6 @@ def plot_feature_combination(data, features):
     
     df = (data.groupby(column).count())['canton']
     
-    print("Plotting features : {}".format(features))
     title = "Number of events per {}".format(column)       
 
     df.plot(kind='bar', stacked=False)
@@ -44,13 +77,21 @@ def plot_feature_combination(data, features):
     plt.title(title)
     plt.xticks(rotation=70)
 
-    plt.savefig("Resources/plots/Feature_combinations/{}.png".format(title), dpi=200)
+    if not os.path.exists(dir_):
+        os.makedirs(dir_)
 
-    print("Done plotting {}".format(column))
+    plt.savefig("{}/{}.png".format(dir_,title), dpi=200)
+    plt.close()
+    if(verbose):
+        print("-> Done plotting {}".format(column))
 
 
-def plot_feature(data, feature, date):
+def plot_feature(df, feature, date):
+    data = df.copy()
     path_log = "logs/plot_logs/{}.txt".format(date)    
+
+    dir_ = "Resources/plots/1-feature"
+
     font = {'family' : 'monospace',
         'weight' : 'normal',
         'size'   : 5}
@@ -90,7 +131,11 @@ def plot_feature(data, feature, date):
     plt.ylabel("Number of events")
     plt.title(title)
     plt.xticks(rotation=70)
-    #plt.rc('xtick', labelsize=45) 
+    #plt.rc('xtick', labelsize=45)
+
+    if not os.path.exists(dir_):
+        os.makedirs(dir_) 
 
 
-    plt.savefig("Resources/plots/Features/{}.png".format(title), dpi=200)
+    plt.savefig("{}/{}.png".format(dir_,title), dpi=200)
+    plt.close()

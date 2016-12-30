@@ -1,0 +1,2 @@
+Plot Error log on 2016-12-29-18h27
+2016-12-29 18:27 : Failed to plot coordinates due to unhashable type: 'list'
