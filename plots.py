@@ -1,9 +1,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import datetime
-import pandas as pd
-from Scripts.helpers import *
-import pprint
 import os
 
 def plot_all_features(data, exclusion_list = ['fsocommunecode', 'type', 'layerBodId', 'geometryType', 'featureId', 'bbox', 'accidentday_fr', 'coordinates']):
