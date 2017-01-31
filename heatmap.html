@@ -24,10 +24,11 @@
     // Show map scale
     L.control.scale({'imperial': false}).addTo(map);
 
-    var accidents;
+    var accidents, heatLayer;
     $.getJSON('data/accidents.json', function (json) {
         accidents = json;
-        var heat = L.heatLayer(get_points(), {radius: 10}).addTo(map)
+        heatLayer = L.heatLayer(get_points(), {radius: 10}).addTo(map);
+        loaded();
     });
 
 
@@ -37,6 +38,10 @@
             list.push([accidents[accident].wgs84_coordinates[0], accidents[accident].wgs84_coordinates[1], 0.75]);
         }
         return list;
+    }
+
+    function loaded() {
+        L.control.layers({}, {'Tracks': heatLayer}).addTo(map);
     }
 </script>
 </body>
