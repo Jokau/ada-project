@@ -24,24 +24,36 @@
     // Show map scale
     L.control.scale({'imperial': false}).addTo(map);
 
-    var accidents, heatLayer;
+    var accidents, heatLayer1, heatLayer2, heatLayer3, heatLayer4, heatLayer5;
     $.getJSON('data/accidents.json', function (json) {
         accidents = json;
-        heatLayer = L.heatLayer(get_points(), {radius: 10}).addTo(map);
+        heatLayer1 = L.heatLayer(get_points(2011), {radius: 5}).addTo(map);
+        heatLayer2 = L.heatLayer(get_points(2012), {radius: 5}).addTo(map);
+        heatLayer3 = L.heatLayer(get_points(2013), {radius: 5}).addTo(map);
+        heatLayer4 = L.heatLayer(get_points(2014), {radius: 5}).addTo(map);
+        heatLayer5 = L.heatLayer(get_points(2015), {radius: 5}).addTo(map);
         loaded();
     });
 
 
-    function get_points() {
+    function get_points(year) {
         var list = [];
         for (var accident in accidents) {
-            list.push([accidents[accident].wgs84_coordinates[0], accidents[accident].wgs84_coordinates[1], 0.75]);
+            if (accidents[accident].year == year) {
+                list.push([accidents[accident].wgs84_coordinates[0], accidents[accident].wgs84_coordinates[1], 10]);
+            }
         }
         return list;
     }
 
     function loaded() {
-        L.control.layers({}, {'Tracks': heatLayer}).addTo(map);
+        L.control.layers({}, {
+            '2011': heatLayer1,
+            '2012': heatLayer2,
+            '2013': heatLayer3,
+            '2014': heatLayer4,
+            '2015': heatLayer5
+        }).addTo(map);
     }
 </script>
 </body>
