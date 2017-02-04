@@ -74,7 +74,7 @@ def find_surrounding_points(x, y, square_size):
     return x2, y2, x3, y3, x4, y4
 
 #Compute the GPS coordinates of the square area.
-def find_square_coords(point_coords, square_size=500):
+def find_square_coords(point_coords, square_size=1000):
     xOffset = 480000
     yOffset = 70000
     
