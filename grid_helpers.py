@@ -98,7 +98,7 @@ def generate_goejson_polygon(point, year):
     "coordinates": [
         [ [%3f, %3f], [%3f, %3f], [%3f, %3f], [%3f, %3f], [%3f, %3f] ]
       ]
-   }\n'''%(year, p1[1], p1[0], p2[1], p2[0], p3[1], p3[0], p4[1], p4[0], p1[1], p1[0])
+   }\n'''%(year, p1[0], p1[1], p4[0], p4[1], p3[0], p3[1], p2[0], p2[1], p1[0], p1[1])
     return s
 
 
