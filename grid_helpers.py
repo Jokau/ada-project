@@ -74,7 +74,7 @@ def find_surrounding_points(x, y, square_size):
     return x2, y2, x3, y3, x4, y4
 
 #Compute the GPS coordinates of the square area.
-def find_square_coords(point_coords, square_size=1000):
+def find_square_coords(point_coords, square_size=500):
     xOffset = 480000
     yOffset = 70000
     
@@ -105,6 +105,7 @@ def generate_goejson_polygon(point, year):
 #This function generates a goejson file describing the locations of the areas with
 #the highest variances in the number of accidents between two consecutive years.
 def goejson_highest_variance_areas(df, threshold=5):
+    #compute grids for each year
     year_grids = create_grid_per_year(df)
     comp_grids = [np.abs(year_grids[i] - year_grids[i+1]) for i in range(len(year_grids) - 1)]
 
@@ -141,18 +142,6 @@ def goejson_highest_variance_areas(df, threshold=5):
                     text_file.write(polygons)
 
 
-
-### DEPRECATED ####
-#This function generates goejson files describing the locations of the areas with
-#the highest variances in the number of accidents between two consecutive years.
-def find_highest_variance_areas(comp_grids, threshold=5):
-    
-    year=2012
-    
-    for x in comp_grids:
-        where = np.where(x > x.max() - threshold)
-        generate_geojson(where, year)
-        year+=1
 
 #This function computes the GPS coordinates based on the Swiss coordinates
 def ch1903_to_wgs84(east, north):
