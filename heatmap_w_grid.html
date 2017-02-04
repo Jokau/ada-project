@@ -1,0 +1,97 @@
+<html>
+<head>
+    <link rel="stylesheet" href="css/leaflet.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/leaflet-heat.js"></script>
+</head>
+<body>
+<div id="heat-map-squares" style="width: 100%; height: 100%">
+
+</div>
+<script>
+    var map = L.map('heat-map-squares', {
+        center: {lat: 46.8, lng: 8.575172424316406},
+        zoom: 8
+    });
+    // Mapbox map layer
+    L.tileLayer('https://api.mapbox.com/styles/v1/ireneu/ciykdf581003h2ro22yelc6ro/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiaXJlbmV1IiwiYSI6ImNpdGZsYzg5NDAwYXI0Nm81bGFqazd3bWsifQ.ZF9CzPxm3b4xGnWmdbPbaQ', {
+        attribution: 'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        maxZoom: 18,
+        id: 'ciykdf581003h2ro22yelc6ro',
+        accessToken: 'pk.eyJ1IjoiaXJlbmV1IiwiYSI6ImNpdGZsYzg5NDAwYXI0Nm81bGFqazd3bWsifQ.ZF9CzPxm3b4xGnWmdbPbaQ'
+    }).addTo(map);
+    // Show map scale
+    L.control.scale({'imperial': false}).addTo(map);
+	
+	var geo_layer12 = [];
+	var geo_layer13 = [];
+	var geo_layer14 = [];
+	var geo_layer15 = []; 
+	var geo_array = [];
+	$.getJSON('data/high_variance_areas.json', function (json) {
+		squares = json;
+		geo_array = squares.geometry.geometries;
+		geo_layer12.push(L.polygon(get_square(2012), {color: 'red'}));
+		geo_layer13.push(L.polygon(get_square(2013), {color: 'red'}));
+		geo_layer14.push(L.polygon(get_square(2014), {color: 'red'}));
+		geo_layer15.push(L.polygon(get_square(2015), {color: 'red'}));
+		console.log(geo_layer12);
+		loaded();
+    });
+	
+	function get_square(year) {
+		var yearCoordList = [];
+		for (var i = 0; i < geo_array.length; i++) {
+			if (geo_array[i].year == year) {
+				var coords = [[geo_array[i].coordinates[0][0][0], geo_array[i].coordinates[0][0][1]],
+				[geo_array[i].coordinates[0][1][0],	geo_array[i].coordinates[0][0][1]],
+				[geo_array[i].coordinates[0][2][0],	geo_array[i].coordinates[0][2][1]],
+				[geo_array[i].coordinates[0][3][0],	geo_array[i].coordinates[0][3][1]],
+				[geo_array[i].coordinates[0][0][0], geo_array[i].coordinates[0][0][1]]];
+				//L.marker([geo_array[i].coordinates[0][0][0], geo_array[i].coordinates[0][0][1]]).addTo(map)
+				yearCoordList.push(coords);
+			}
+		}
+		return yearCoordList;
+    }
+	
+	var accidents, heatLayer1, heatLayer2, heatLayer3, heatLayer4, heatLayer5;
+    $.getJSON('data/accidents.json', function (json) {
+        accidents = json;
+        heatLayer1 = L.heatLayer(get_points(2011), {radius: 5}).addTo(map);
+        heatLayer2 = L.heatLayer(get_points(2012), {radius: 5}).addTo(map);
+        heatLayer3 = L.heatLayer(get_points(2013), {radius: 5}).addTo(map);
+        heatLayer4 = L.heatLayer(get_points(2014), {radius: 5}).addTo(map);
+        heatLayer5 = L.heatLayer(get_points(2015), {radius: 5}).addTo(map);
+        loaded();
+        L.marker([46.805, 7.16280]).addTo(map);
+    });
+	
+	function get_points(year) {
+        var list = [];
+        for (var accident in accidents) {
+            if (accidents[accident].year == year) {
+                list.push([accidents[accident].wgs84_coordinates[0], accidents[accident].wgs84_coordinates[1], 10]);
+            }
+        }
+        return list;
+    }
+	
+
+    function loaded() {
+        L.control.layers({}, {
+		    'accidents 2011': heatLayer1,
+            'accidents 2012': heatLayer2,
+            'accidents 2013': heatLayer3,
+            'accidents 2014': heatLayer4,
+            'accidents 2015': heatLayer5,
+            'high variation areas 2011-12': L.layerGroup(geo_layer12).addTo(map),
+			'high variation areas 2012-13': L.layerGroup(geo_layer13).addTo(map),
+			'high variation areas 2013-14': L.layerGroup(geo_layer14).addTo(map),
+			'high variation areas 2014-15': L.layerGroup(geo_layer15).addTo(map),
+        }).addTo(map);
+    }
+</script>
+</body>
+</html>
