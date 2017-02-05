@@ -47,3 +47,6 @@ Geographical representation of the different extractable information (number, ca
 -> 20.11 - 3.12: Clusters, region information<br/>
 -> 3.12 – 17.12 (Checkpoint): data analysis based on type, time, …<br/>
 -> 17.12- end January: visualization<br/>
+
+05.02 Project ended ready for evaluation!
+Notebook : project_data_scraping.ipynb
